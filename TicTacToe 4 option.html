@@ -1102,15 +1102,13 @@
                 console.log('Connected to server with ID:', state.socketId);
             });
             
-            socket.on('roomCreated', (roomId) => {
-                console.log('Room created:', roomId);
-                state.roomId = roomId;
-                roomIdDisplay.textContent = roomId;
-                currentRoomIdDisplay.textContent = roomId;
-                
-                // Update player badge
-                playerXName.textContent = state.playerName + ' (X)';
-            });
+           socket.on('roomCreated', (roomId) => {
+               console.log('Room created:', roomId);
+               state.roomId = roomId;
+               roomIdDisplay.textContent = roomId;
+               currentRoomIdDisplay.textContent = roomId;
+               playerXName.textContent = state.playerName + ' (X)';
+             });
             
             socket.on('playerJoined', (players) => {
                 console.log('Player joined:', players);
@@ -1265,12 +1263,12 @@
             // Generate random room ID
             function generateRoomId() {
                 const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-                let result = '';
+                let result = 'ROOM-';
                 for (let i = 0; i < 4; i++) {
                     result += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
                 return result;
-            }
+           }
             
             // Highlight current player
             function highlightCurrentPlayer() {
@@ -1359,6 +1357,20 @@
             createRoomOption.addEventListener('click', () => {
                 roomOptions.style.display = 'none';
                 createRoomForm.style.display = 'flex';
+    
+                 // Remove client-side generation and use server response instead
+                 state.playerName = playerNameInput.value || 'Player';
+    
+                 // Emit create room event - server will generate ID
+                 socket.emit('createRoom', state.playerName);
+    
+                  // Show room info
+                  roomInfo.style.display = 'flex';
+    
+                  // Disable start button until opponent joins
+                  startGameBtn.disabled = true;
+                  startGameBtn.innerHTML = '<span class="spinner"></span> Waiting for opponent...';
+              });
                 
                 // Generate room ID
                 state.roomId = generateRoomId();
